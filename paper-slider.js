@@ -13,13 +13,13 @@ import '@polymer/paper-input/paper-input.js';
 import '@polymer/paper-progress/paper-progress.js';
 import '@polymer/paper-styles/color.js';
 
-import {IronA11yKeysBehavior} from '@polymer/iron-a11y-keys-behavior/iron-a11y-keys-behavior.js';
-import {IronFormElementBehavior} from '@polymer/iron-form-element-behavior/iron-form-element-behavior.js';
-import {IronRangeBehavior} from '@polymer/iron-range-behavior/iron-range-behavior.js';
-import {PaperInkyFocusBehavior, PaperInkyFocusBehaviorImpl} from '@polymer/paper-behaviors/paper-inky-focus-behavior.js';
-import {Polymer} from '@polymer/polymer/lib/legacy/polymer-fn.js';
-import {setTouchAction} from '@polymer/polymer/lib/utils/gestures.js';
-import {html} from '@polymer/polymer/polymer-legacy.js';
+import { IronA11yKeysBehavior } from '@polymer/iron-a11y-keys-behavior/iron-a11y-keys-behavior.js';
+import { IronFormElementBehavior } from '@polymer/iron-form-element-behavior/iron-form-element-behavior.js';
+import { IronRangeBehavior } from '@polymer/iron-range-behavior/iron-range-behavior.js';
+import { PaperInkyFocusBehavior, PaperInkyFocusBehaviorImpl } from '@polymer/paper-behaviors/paper-inky-focus-behavior.js';
+import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
+import { setTouchAction } from '@polymer/polymer/lib/utils/gestures.js';
+import { html } from '@polymer/polymer/polymer-legacy.js';
 
 const template = html`
   <style>
@@ -151,7 +151,7 @@ const template = html`
       position: absolute;
       left: 0;
       top: 0;
-      margin-left: calc(-15px - var(--calculated-paper-slider-height)/2);
+      /* margin-left: calc(-15px - var(--calculated-paper-slider-height)/2); */
       width: calc(30px + var(--calculated-paper-slider-height));
       height: calc(30px + var(--calculated-paper-slider-height));
     }
@@ -174,13 +174,13 @@ const template = html`
     }
 
     .slider-knob-inner {
-      margin: 10px;
-      width: calc(100% - 20px);
-      height: calc(100% - 20px);
+      margin: var(--paper-slider-knob-inner-margin, 10px);
+      width: var(--paper-slider-knob-inner-width, calc(100% - 20px));
+      height: var(--paper-slider-knob-inner-height, calc(100% - 20px));
       background-color: var(--paper-slider-knob-color, var(--google-blue-700));
       border: 2px solid var(--paper-slider-knob-color, var(--google-blue-700));
-      border-radius: 50%;
-
+      /* border-radius: 50%; */
+      border-radius: var(--paper-slider-knob-inner-border-radius, 50%);
       -moz-box-sizing: border-box;
       box-sizing: border-box;
 
@@ -287,9 +287,9 @@ const template = html`
     }
   </style>
 
-  <div id="sliderContainer" class$="[[_getClassNames(disabled, pin, snaps, immediateValue, min, expand, dragging, transiting, editable)]]">
+  <div id="sliderContainer" class\$="[[_getClassNames(disabled, pin, snaps, immediateValue, min, expand, dragging, transiting, editable)]]">
     <div class="bar-container">
-      <paper-progress disabled$="[[disabled]]" id="sliderBar" aria-hidden="true" min="[[min]]" max="[[max]]" step="[[step]]" value="[[immediateValue]]" secondary-progress="[[secondaryProgress]]" on-down="_bardown" on-up="_resetKnob" on-track="_bartrack" on-tap="_barclick">
+      <paper-progress disabled\$="[[disabled]]" id="sliderBar" aria-hidden="true" min="[[min]]" max="[[max]]" step="[[step]]" value="[[immediateValue]]" secondary-progress="[[secondaryProgress]]" on-down="_bardown" on-up="_resetKnob" on-track="_bartrack" on-tap="_barclick">
       </paper-progress>
     </div>
 
@@ -302,12 +302,12 @@ const template = html`
     </template>
 
     <div id="sliderKnob" class="slider-knob" on-down="_knobdown" on-up="_resetKnob" on-track="_onTrack" on-transitionend="_knobTransitionEnd">
-        <div class="slider-knob-inner" value$="[[immediateValue]]"></div>
+        <div class="slider-knob-inner" value\$="[[immediateValue]]"></div>
     </div>
   </div>
 
   <template is="dom-if" if="[[editable]]">
-    <paper-input id="input" type="number" step="[[step]]" min="[[min]]" max="[[max]]" class="slider-input" disabled$="[[disabled]]" value="[[immediateValue]]" on-change="_changeValue" on-keydown="_inputKeyDown" no-label-float>
+    <paper-input id="input" type="number" step="[[step]]" min="[[min]]" max="[[max]]" class="slider-input" disabled\$="[[disabled]]" value="[[immediateValue]]" on-change="_changeValue" on-keydown="_inputKeyDown" no-label-float>
     </paper-input>
   </template>
 `;
@@ -353,6 +353,8 @@ Custom property | Description | Default
 `--paper-slider-knob-start-border-color` | The border color of the knob at the far left | `--paper-grey-400`
 `--paper-slider-pin-start-color` | The color of the pin at the far left | `--paper-grey-400`
 `--paper-slider-height` | Height of the progress bar | `2px`
+`--paper-slider-knob-inner-width` | Mixin applied to the knob | `calc(100% - 20px)`
+`--paper-slider-knob-inner-height` | Mixin applied to the knob | `calc(100% - 20px)`
 `--paper-slider-input` | Mixin applied to the input in editable mode | `{}`
 `--paper-slider-input-container-input` | Mixin applied to the paper-input-container-input in editable mode | `{}`
 
@@ -474,9 +476,17 @@ Polymer({
     markers: {
       type: Array,
       readOnly: true,
-      value: function() {
+      value: function () {
         return [];
       },
+    },
+
+    /**
+     * If true, the knob wont be allowed to drag past secondary progess
+     */
+    secondaryProgressAsMax: {
+      type: Boolean,
+      value: false,
     },
   },
 
@@ -500,7 +510,7 @@ Polymer({
     'up pageup end': '_incrementKey',
   },
 
-  ready: function() {
+  ready: function () {
     if (this.ignoreBarTouch) {
       setTouchAction(this.$.sliderBar, 'auto');
     }
@@ -510,7 +520,7 @@ Polymer({
    * Increases value by `step` but not above `max`.
    * @method increment
    */
-  increment: function() {
+  increment: function () {
     this.value = this._clampValue(this.value + this.step);
   },
 
@@ -518,11 +528,11 @@ Polymer({
    * Decreases value by `step` but not below `min`.
    * @method decrement
    */
-  decrement: function() {
+  decrement: function () {
     this.value = this._clampValue(this.value - this.step);
   },
 
-  _updateKnob: function(value, min, max, snaps, step) {
+  _updateKnob: function (value, min, max, snaps, step) {
     this.setAttribute('aria-valuemin', min);
     this.setAttribute('aria-valuemax', max);
     this.setAttribute('aria-valuenow', value);
@@ -530,32 +540,32 @@ Polymer({
     this._positionKnob(this._calcRatio(value) * 100);
   },
 
-  _valueChanged: function() {
-    this.fire('value-change', {composed: true});
+  _valueChanged: function () {
+    this.fire('value-change', { composed: true });
   },
 
-  _immediateValueChanged: function() {
+  _immediateValueChanged: function () {
     if (this.dragging) {
-      this.fire('immediate-value-change', {composed: true});
+      this.fire('immediate-value-change', { composed: true });
     } else {
       this.value = this.immediateValue;
     }
   },
 
-  _secondaryProgressChanged: function() {
+  _secondaryProgressChanged: function () {
     this.secondaryProgress = this._clampValue(this.secondaryProgress);
   },
 
-  _expandKnob: function() {
+  _expandKnob: function () {
     this._setExpand(true);
   },
 
-  _resetKnob: function() {
+  _resetKnob: function () {
     this.cancelDebouncer('expandKnob');
     this._setExpand(false);
   },
 
-  _positionKnob: function(ratio) {
+  _positionKnob: function (ratio) {
     this._setImmediateValue(this._calcStep(this._calcKnobPosition(ratio)));
     this._setRatio(this._calcRatio(this.immediateValue) * 100);
 
@@ -566,11 +576,11 @@ Polymer({
     }
   },
 
-  _calcKnobPosition: function(ratio) {
+  _calcKnobPosition: function (ratio) {
     return (this.max - this.min) * ratio / 100 + this.min;
   },
 
-  _onTrack: function(event) {
+  _onTrack: function (event) {
     event.stopPropagation();
     switch (event.detail.state) {
       case 'start':
@@ -585,7 +595,7 @@ Polymer({
     }
   },
 
-  _trackStart: function(event) {
+  _trackStart: function (event) {
     this._setTransiting(false);
     this._w = this.$.sliderBar.offsetWidth;
     this._x = this.ratio * this._w / 100;
@@ -597,27 +607,31 @@ Polymer({
     this._setDragging(true);
   },
 
-  _trackX: function(event) {
+  _trackX: function (event) {
     if (!this.dragging) {
       this._trackStart(event);
     }
 
     var direction = this._isRTL ? -1 : 1;
     var dx =
-        Math.min(this._maxx, Math.max(this._minx, event.detail.dx * direction));
+      Math.min(this._maxx, Math.max(this._minx, event.detail.dx * direction));
     this._x = this._startx + dx;
 
-    var immediateValue =
-        this._calcStep(this._calcKnobPosition(this._x / this._w * 100));
+    var immediateValue = this._calcStep(this._calcKnobPosition(this._x / this._w * 100));
+
+    if (this.secondaryProgressAsMax && (immediateValue > this.secondaryProgress)) {
+      return false;
+    }
+
     this._setImmediateValue(immediateValue);
 
     // update knob's position
     var translateX =
-        ((this._calcRatio(this.immediateValue) * this._w) - this._knobstartx);
+      ((this._calcRatio(this.immediateValue) * this._w) - this._knobstartx);
     this.translate3d(translateX + 'px', 0, 0, this.$.sliderKnob);
   },
 
-  _trackEnd: function() {
+  _trackEnd: function () {
     var s = this.$.sliderKnob.style;
 
     this.$.sliderKnob.classList.remove('dragging');
@@ -627,10 +641,10 @@ Polymer({
 
     s.transform = s.webkitTransform = '';
 
-    this.fire('change', {composed: true});
+    this.fire('change', { composed: true });
   },
 
-  _knobdown: function(event) {
+  _knobdown: function (event) {
     this._expandKnob();
 
     // cancel selection
@@ -640,13 +654,13 @@ Polymer({
     this.focus();
   },
 
-  _bartrack: function(event) {
+  _bartrack: function (event) {
     if (this._allowBarEvent(event)) {
       this._onTrack(event);
     }
   },
 
-  _barclick: function(event) {
+  _barclick: function (event) {
     this._w = this.$.sliderBar.offsetWidth;
     var rect = this.$.sliderBar.getBoundingClientRect();
     var ratio = (event.detail.x - rect.left) / this._w * 100;
@@ -665,8 +679,8 @@ Polymer({
       this._setTransiting(false);
     }
 
-    this.async(function() {
-      this.fire('change', {composed: true});
+    this.async(function () {
+      this.fire('change', { composed: true });
     });
 
     // cancel selection
@@ -676,20 +690,20 @@ Polymer({
     this.focus();
   },
 
-  _bardown: function(event) {
+  _bardown: function (event) {
     if (this._allowBarEvent(event)) {
       this.debounce('expandKnob', this._expandKnob, 60);
       this._barclick(event);
     }
   },
 
-  _knobTransitionEnd: function(event) {
+  _knobTransitionEnd: function (event) {
     if (event.target === this.$.sliderKnob) {
       this._setTransiting(false);
     }
   },
 
-  _updateMarkers: function(maxMarkers, min, max, snaps) {
+  _updateMarkers: function (maxMarkers, min, max, snaps) {
     if (!snaps) {
       this._setMarkers([]);
     }
@@ -703,15 +717,15 @@ Polymer({
     this._setMarkers(new Array(steps));
   },
 
-  _mergeClasses: function(classes) {
+  _mergeClasses: function (classes) {
     return Object.keys(classes)
-        .filter(function(className) {
-          return classes[className];
-        })
-        .join(' ');
+      .filter(function (className) {
+        return classes[className];
+      })
+      .join(' ');
   },
 
-  _getClassNames: function() {
+  _getClassNames: function () {
     return this._mergeClasses({
       disabled: this.disabled,
       pin: this.pin,
@@ -724,10 +738,10 @@ Polymer({
     });
   },
 
-  _allowBarEvent: function(event) {
+  _allowBarEvent: function (event) {
     return (
-        !this.ignoreBarTouch ||
-        (event.detail.sourceEvent instanceof MouseEvent))
+      !this.ignoreBarTouch ||
+      (event.detail.sourceEvent instanceof MouseEvent))
   },
 
   get _isRTL() {
@@ -737,21 +751,21 @@ Polymer({
     return this.__isRTL;
   },
 
-  _leftKey: function(event) {
+  _leftKey: function (event) {
     if (this._isRTL)
       this._incrementKey(event);
     else
       this._decrementKey(event);
   },
 
-  _rightKey: function(event) {
+  _rightKey: function (event) {
     if (this._isRTL)
       this._decrementKey(event);
     else
       this._incrementKey(event);
   },
 
-  _incrementKey: function(event) {
+  _incrementKey: function (event) {
     if (!this.disabled) {
       if (event.detail.key === 'end') {
         this.value = this.max;
@@ -763,7 +777,7 @@ Polymer({
     }
   },
 
-  _decrementKey: function(event) {
+  _decrementKey: function (event) {
     if (!this.disabled) {
       if (event.detail.key === 'home') {
         this.value = this.min;
@@ -775,17 +789,17 @@ Polymer({
     }
   },
 
-  _changeValue: function(event) {
+  _changeValue: function (event) {
     this.value = event.target.value;
-    this.fire('change', {composed: true});
+    this.fire('change', { composed: true });
   },
 
-  _inputKeyDown: function(event) {
+  _inputKeyDown: function (event) {
     event.stopPropagation();
   },
 
   // create the element ripple inside the `sliderKnob`
-  _createRipple: function() {
+  _createRipple: function () {
     this._rippleContainer = this.$.sliderKnob;
     return PaperInkyFocusBehaviorImpl._createRipple.call(this);
   },
@@ -794,7 +808,7 @@ Polymer({
   // This behavior is different from other ripple-y controls, but is
   // according to spec:
   // https://www.google.com/design/spec/components/sliders.html
-  _focusedChanged: function(receivedFocusFromKeyboard) {
+  _focusedChanged: function (receivedFocusFromKeyboard) {
     if (receivedFocusFromKeyboard) {
       this.ensureRipple();
     }
