@@ -355,6 +355,8 @@ Custom property | Description | Default
 `--paper-slider-height` | Height of the progress bar | `2px`
 `--paper-slider-knob-inner-width` | Mixin applied to the knob | `calc(100% - 20px)`
 `--paper-slider-knob-inner-height` | Mixin applied to the knob | `calc(100% - 20px)`
+`--paper-slider-knob-inner-margin` | Mixin applied to the knob | `10px`
+`--paper-slider-knob-inner-border-radius` | Mixin applied to the knob | `50%`
 `--paper-slider-input` | Mixin applied to the input in editable mode | `{}`
 `--paper-slider-input-container-input` | Mixin applied to the paper-input-container-input in editable mode | `{}`
 
