@@ -22,9 +22,7 @@
     "@polymer/gen-typescript-declarations": "^1.5.1"
   },
   "scripts": {
-    "format": "webmat",
-    "generate-types": "gen-typescript-declarations --deleteExisting --outDir . --verify",
-    "prepare": "npm run generate-types"
+    "format": "webmat"
   },
   "version": "3.0.2",
   "main": "paper-slider.js",
